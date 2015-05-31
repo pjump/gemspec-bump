@@ -6,7 +6,7 @@ include Gemspec
 
 def usage
   <<-EOF.gsub(/^  /,'')
-    Usage: gemspec-bump VERSIONFILE VERSIONDIFF
+    Usage: gemspec-bumpfile VERSIONFILE VERSIONDIFF
 
     Works the same as gemspec-spec expect the VERSION string is read from VERSIONFILE and the 
     result is also written to VERSIONFILE.
