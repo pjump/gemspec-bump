@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+# -*- coding: utf-8 -*-
+
+require 'gemspec/bump'
+include Gemspec
+
+def usage
+  File.read(File.expand_path('../../README-VERSIONPATCH.md', __FILE__))
+end
+
+if ARGV.delete('-h') || ARGV.delete('--help')
+  puts usage
+  exit
+end
+
+ARGV.size == 2 or (
+  warn usage
+  exit 1
+)
+puts Version.new(ARGV.first).apply(VersionDiff.new(ARGV.last))

@@ -23,6 +23,21 @@ describe "Gemspec::Version" do
     end
   end
 
+  describe "Applying version diff" do
+    #version, diff, result
+    [
+    %w[1.0.0 1.+1.0 1.1.0],
+    %w[1.0.1 1.+1.2 1.1.2],
+    %w[1.1.1 1.-1.2 1.0.2],
+    %w[1.1.1 +1.2 1.2.2],
+    %w[1.1.1.1 +3.+1.2 1.4.2.2],
+    ].each do |version, diff, result|
+      it "should combine #{version} with #{diff} into #{result}" do
+        assert_equal Gemspec::Version.new(result), Gemspec::Version.new(version).apply(Gemspec::VersionDiff.new(diff)) 
+      end
+    end
+  end
+
 end
 
 describe "Gemspec::VersionDiff" do

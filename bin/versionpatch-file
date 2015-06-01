@@ -1,0 +1,29 @@
+#!/usr/bin/env ruby
+# -*- coding: utf-8 -*-
+
+require 'gemspec/version'
+include Gemspec
+
+def usage
+  <<-EOF.gsub(/^  /,'')
+    Usage: versionpatch-file VERSIONFILE VERSIONDIFF
+
+    Works the same as versionpatch expect the VERSION string is read from VERSIONFILE and the 
+    result is also written to VERSIONFILE.
+
+    See `versionpatch --help` for more information.
+  EOF
+end
+
+if ARGV.delete('-h') || ARGV.delete('--help')
+  puts usage
+  exit
+end
+
+ARGV.size == 1 or (
+  warn usage
+  exit 1
+)
+old_version = File.read(ARGV.first)
+new_version = Version.new(ARGV[0]).apply(VersionDiff.new(ARGV[1]))
+File.write(ARGV[0], new_version)
