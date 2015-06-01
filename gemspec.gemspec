@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
 
   Gemspec.boilerplate(s)
 
-  s.metadata['allowed_push_host'] = "TODO: Set to 'http://mygemserver.com' to prevent pushes to rubygems.org, or delete to allow pushes to any server."
+  #s.metadata['allowed_push_host'] = "TODO: Set to 'http://mygemserver.com' to prevent pushes to rubygems.org, or delete to allow pushes to any server."
 
   #####Must change
   s.summary       = %q{A version bumper}
