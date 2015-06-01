@@ -17,7 +17,7 @@ Gem::Specification.new do |s|
 
   #####Must change
   s.summary       = %q{A version bumper}
-  s.description   = %q{A version bumper}
+  s.description   = %q{A flexible and concise version bumper that can, in a single command, take care of all the git ceremony in a git-flow compatible fashion . }
   s.licenses      = %w[GPL-2.0]
 
 
@@ -28,7 +28,7 @@ Gem::Specification.new do |s|
   ###################################
 
   #Dependencies
-  s.add_dependency 'gemspec', '~> 0.2'
+  s.add_dependency 'gemspec', '~> 0'
   s.add_development_dependency 'rake', '~> 10.4'
   s.add_development_dependency 'minitest-documentation'
 
