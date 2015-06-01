@@ -5,7 +5,7 @@ require 'gemspec/bump'
 include Gemspec
 
 def usage
-  File.read(File.expand_path('../../USAGE.md', __FILE__))
+  File.read(File.expand_path('../../README-VERSIONPATCH.md', __FILE__))
 end
 
 if ARGV.delete('-h') || ARGV.delete('--help')

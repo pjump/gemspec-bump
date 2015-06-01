@@ -6,10 +6,12 @@ include Gemspec
 
 def usage
   <<-EOF.gsub(/^  /,'')
-    Usage: gemspec-bumpfile VERSIONFILE VERSIONDIFF
+    Usage: versionpatch-file VERSIONFILE VERSIONDIFF
 
-    Works the same as gemspec-spec expect the VERSION string is read from VERSIONFILE and the 
+    Works the same as versionpatch expect the VERSION string is read from VERSIONFILE and the 
     result is also written to VERSIONFILE.
+
+    See `versionpatch --help` for more information.
   EOF
 end
 

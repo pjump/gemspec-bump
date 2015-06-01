@@ -1,27 +1,77 @@
 #!/usr/bin/env ruby
 # -*- coding: utf-8 -*-
-
-require 'gemspec/version'
-include Gemspec
+require 'shellwords'
 
 def usage
   <<-EOF.gsub(/^  /,'')
-    Usage: gemspec-bump VERSIONFILE VERSIONDIFF
+    Usage: gemspec-bump [VERSION-diff [VERSION_FOR_HUMANS-diff]]
 
-    Works the same as gemspec-spec expect the VERSION string is read from VERSIONFILE and the 
-    result is also written to VERSIONFILE.
+    Apply given diffs to VERSION and VERSION_FOR_HUMANS respectively where VERSION and VERSION_FOR_HUMANS are files (possibly symlinks) in the root of the git repo, which should
+    contain version strings (integers seperated by dots) and be managed by git.
+
+    At least VERSION-diff must be present. If it is not, $EDITOR is open for both.
+
+    If at the end VERSION differs from what it is at the top of the current branch, 
+    the VERSION file will be committed with a generated message.
+    This commit will be merged into master and, if the merge is sucessful, the top of master will be
+    tagged `v$(cat VERSION)` and `h$(cat VERSION_FOR_HUMANS)` and merged back into the previous branch.
   EOF
 end
 
-if ARGV.delete('-h') || ARGV.delete('--help')
-  puts usage
-  exit
-end
-
-ARGV.size == 1 or (
-  warn usage
+require 'gemspec/git'
+require 'gemspec/bump'
+include Gemspec
+Git.cdroot!
+$? == 0 or (
+  warn "Not in a git repository"
   exit 1
 )
-old_version = File.read(ARGV.first)
-new_version = Version.new(ARGV[0]).apply(VersionDiff.new(ARGV[1]))
-File.write(ARGV[0], new_version)
+
+if (original_branch=`git branch`.split("\n").grep(/^\*/)[0].sub(/^\*\s*/,'')) == 'master'
+  warn "Bumping must be done on a non-master branch.\n If succesful, the result will be merged into master and back to the original branch"
+end
+
+new_version = nil
+new_version_for_humans = nil
+
+if ARGV[0]
+  old_version = File.read('VERSION').chomp
+  new_version = Version.new(old_version).apply(VersionDiff.new(ARGV[0])).to_s
+  File.write('VERSION', new_version + "\n")
+
+  if ARGV[1]
+    old_version_for_humans = File.read('VERSION_FOR_HUMANS').chomp
+    new_version_for_humans = Version.new(old_version_for_humans).apply(VersionDiff.new(ARGV[1])).to_s
+    File.write('VERSION_FOR_HUMANS', new_version_for_humans + "\n")
+  end
+else
+  system(ENV['EDITOR'], 'VERSION', 'VERSION_FOR_HUMANS')
+end
+
+if `git status --porcelain "$(readlink VERSION)"`.chomp == ""
+  system(ENV['EDITOR'], 'VERSION')
+end
+
+if `git status --porcelain "$(readlink VERSION)"`.chomp == ""
+  warn "A bump must change VERSION"
+  exit 1
+end
+
+new_version = File.read('VERSION').chomp
+new_version_for_humans = File.read('VERSION_FOR_HUMANS').chomp
+
+files_to_git_add = %w[VERSION VERSION_FOR_HUMANS].map! {|f| File.symlink?(f) ? File.readlink(f) : f }
+system('git', 'add','--', *files_to_git_add)
+
+msg = "Bump to VERSION to v#{new_version}\n\nVERSION_FOR_HUMANS == #{new_version_for_humans}"
+system <<-EOF
+ set -e
+ git commit -m #{Shellwords.escape msg}
+ git checkout master
+ git merge @{-1} --no-edit --no-ff
+ git tag v#{Shellwords.escape new_version}
+ git tag h#{Shellwords.escape new_version_for_humans} || true
+ git checkout @{-1}
+ git merge master
+ git log --oneline --decorate | tac
+EOF
