@@ -7,7 +7,7 @@ task 'release' => 'gem' do
     warn "Need to clean up before releasing"
     exit 1
   )
-  sh = "git checkout master"
+  sh "git checkout master"
   s = Gem::Specification.load('gemspec.gemspec')
   sh <<-EOF
     git push origin master &
